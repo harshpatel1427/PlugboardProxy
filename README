@@ -1,0 +1,64 @@
+############################################### CSE 508 Network Security ########################################################################################
+
+Homework 3: Plugboard Proxy 
+Name: Harshkumar Patel
+SBU ID: 110371010
+
+##################################################################################################################################################################
+
+List of all files:
+
+- keyfile: This file contains symmetric key required for encryption/decryption operation.
+
+- common_def.h: This a common header file contains required shared structure for different files.
+
+- Makefile: This file is used to compile and create executable for source code.
+
+- pbproxy.c: This file contains code which is responsible for all socket communication as well as for
+			 encryption and decryption operation between client and server proxy.
+
+##################################################################################################################################################################
+
+How to run this code:
+
+0. Make sure that SSH service is running on machine where you are trying to connect.
+
+1. To run this code you need two terminals or two machines. (One acts as client and other as server)
+	(Note: SSH can be run on another machine but for simplicity it is assumed that it is running on same machine as server code)
+
+2. Do 'make' inside directory where this code is located. (If you are using two different machines then you need to do this for each machine)
+
+3. Now, on one terminal (or machine) run this command:
+
+	./pbproxy -l portnumber -k keyfilename  localhost 22
+
+	(Note: Here 'localhost' is where SSH service is running and '22' is port number on which sshd is listening. 'portnumber' is port on whcih
+		   server proxy is listening for connection. 'keyfilename' is name of file which contains symmetric code)
+
+4. Now, on second terminal (or machine) run this command:
+
+	ssh -o "ProxyCommand ./pbproxy -k keyfilename localhost portnumber" localhost
+
+	(Note: Here 'localhost' is where server is running and 'portnumber' is port number on which server proxy is listening.
+			    'keyfilename' is name of file which contains symmetric code.)
+
+5. After the execution of code, do 'make clean' to perform cleanup.
+
+###################################################################################################################################################################
+
+Description:
+
+After the successful execution of above commands, server proxy will be listening for incoming connection from client proxy. Whenever proxy command
+is run on client, it will connect to remote host through client and server proxy. Each message exchange between local host and ssh remote host will
+be first encrypted and after that it will be sent to its peer. For exaample, when client proxy got some data from stdin, it will first encrypt it
+and then send it to server proxy who then decrypt it before sending it to ssh socket. Here, for each message exchange, different IV is used. This
+IV will be attached to message and extracted before decrypting the message. Here server is designed in such a way that it can listen and connect to
+multiple client at the same time. Even after the connection termination from all clients, it will keep on listening for new connection.
+
+####################################################################################################################################################################
+
+References:
+
+1. Running ssh service on ubuntu: https://help.ubuntu.com/community/SSH/OpenSSH/Configuring
+2. Socket programming in C: http://www.linuxhowtos.org/C_C++/socket.htm
+3. AES CTR encryption: http://www.gurutechnologies.net/blog/aes-ctr-encryption-in-c/
